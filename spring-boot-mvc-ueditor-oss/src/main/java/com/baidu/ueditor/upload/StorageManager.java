@@ -2,55 +2,74 @@ package com.baidu.ueditor.upload;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.qiniu.common.Zone;
-import com.qiniu.storage.Configuration;
-import org.apache.commons.io.FileUtils;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+
+import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PutObjectResult;
 import com.baidu.ueditor.define.AppInfo;
 import com.baidu.ueditor.define.BaseState;
 import com.baidu.ueditor.define.FileType;
 import com.baidu.ueditor.define.State;
-import com.qiniu.common.QiniuException;
-import com.qiniu.http.Response;
-import com.qiniu.storage.UploadManager;
-import com.qiniu.util.Auth;
+
 
 public class StorageManager {
-	public static final int BUFFER_SIZE = 8192;
+public static final int BUFFER_SIZE = 8192;
 	
+	public static String accessId;
 	public static String accessKey;
-	public static String secretKey;
-	public static String baseUrl;
-	public static String bucket;
+	public static String downloadDNS;
+	public static String bucketName;
 	public static String uploadDirPrefix;
-	public static Zone zone;
-
+	public static String endpoint;
+	private static final Logger logger = Logger.getLogger(StorageManager.class);
+	
 	public static State saveBinaryFile(byte[] data, String path) {
-
+	
+		
 		State state = null ;
 		String key = uploadDirPrefix + getFileName(path);
+		String fileUrl = null;
+		OSSClient client = null;
 		try {
-			String uploadToken = Auth.create(accessKey, secretKey).uploadToken(bucket);
-			Response response = new UploadManager(new Configuration(zone)).put(data, key, uploadToken);
-			if (response.statusCode == 200) {
-				state = new BaseState(true);
-				state.putInfo("size", data.length);
-				state.putInfo("title", path);
-				state.putInfo("url", baseUrl + key);
-			} else {
-				state = new BaseState(false, AppInfo.IO_ERROR);
-			}
-		} catch (QiniuException e) {
+			client = new OSSClient(endpoint, accessId, accessKey);
+			
+			InputStream content = new ByteArrayInputStream(data); 
+			ObjectMetadata meta = new ObjectMetadata();
+			meta.setContentLength(data.length);
+			PutObjectResult  result= client.putObject(bucketName, key, content);
+//			if(result.getETag())			
+			fileUrl = "http://"+downloadDNS+"/"+key;
+			state = new BaseState(true);
+			state.putInfo("size", data.length);
+			state.putInfo("title", path);
+			state.putInfo("url",fileUrl);
+		} catch (OSSException oe) {
+			logger.error("Error Message: " + oe.getErrorCode()+"\n");
+			logger.error("Error Code:       " + oe.getErrorCode()+"\n");
+			logger.error("Request ID:      " + oe.getRequestId()+"\n");
+			logger.error("Host ID:           " + oe.getHostId()+"\n");
 			state = new BaseState(false, AppInfo.IO_ERROR);
+		} finally{
+			if(client != null){
+				client.shutdown();
+			}
+			
 		}
-		return state;
+		return state;		
 	}
 
 	public static State saveFileByInputStream(InputStream is, String path,long maxSize) {
@@ -75,11 +94,10 @@ public class StorageManager {
 			}
 
 			state = saveTmpFile(tmpFile, path);
-
+					
 			if (!state.isSuccess()) {
 				tmpFile.delete();
 			}
-
 			return state;
 			
 		} catch (IOException e) {
@@ -105,8 +123,8 @@ public class StorageManager {
 			bos.flush();
 			bos.close();
 
-			state = saveTmpFile(tmpFile, path);
-
+			state = saveTmpFile(tmpFile, path);				
+			
 			if (!state.isSuccess()) {
 				tmpFile.delete();
 			}
@@ -126,20 +144,37 @@ public class StorageManager {
 	private static State saveTmpFile(File tmpFile, String path) {
 		State state = null ;
 		String key = uploadDirPrefix + getFileName(path);
+		String fileUrl = null;
+		OSSClient client = null;
 		try {
-			String uploadToken = Auth.create(accessKey, secretKey).uploadToken(bucket);
-			Response response = new UploadManager(new Configuration(zone)).put(tmpFile, key, uploadToken);
-			if (response.statusCode == 200) {
-				state = new BaseState(true);
-				state.putInfo("size", tmpFile.length());
-				state.putInfo("title", key);
-				state.putInfo("url", baseUrl +"/"+ key);
-			} else {
-				state = new BaseState(false, AppInfo.IO_ERROR);
+			client = new OSSClient(endpoint, accessId, accessKey);			
+			InputStream content = new FileInputStream(tmpFile);
+			ObjectMetadata meta = new ObjectMetadata();
+			meta.setContentLength(tmpFile.length());
+			client.putObject(bucketName, key, content);
+			if(tmpFile.isFile() && tmpFile.exists()) {
+				tmpFile.delete();
 			}
-		} catch (QiniuException e) {
+			fileUrl = "http://"+downloadDNS+"/"+key;
+			state = new BaseState(true);
+			state.putInfo("size", tmpFile.length());
+			state.putInfo("title", key);
+			state.putInfo("url", fileUrl);
+			
+		} catch (OSSException oe) {
+			logger.error("Error Message: " + oe.getErrorCode()+"\n");
+			logger.error("Error Code:       " + oe.getErrorCode()+"\n");
+			logger.error("Request ID:      " + oe.getRequestId()+"\n");
+			logger.error("Host ID:           " + oe.getHostId()+"\n");
 			state = new BaseState(false, AppInfo.IO_ERROR);
-		}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			state = new BaseState(false, AppInfo.IO_ERROR);
+		} finally{
+			if(client != null){
+				client.shutdown();
+			}
+		}		
 		return state;
 	}
 	

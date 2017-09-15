@@ -32,14 +32,12 @@ public class UeditorAutoConfiguration {
 	}
 	@PostConstruct
 	public void storagemanager(){
-		StorageManager.accessKey = FileManager.accessKey = ueditorProperties.getAccessKey();
-		StorageManager.secretKey = FileManager.secretKey = ueditorProperties.getSecretKey();
-		StorageManager.baseUrl  = FileManager.baseUrl = ueditorProperties.getBaseUrl();
-		StorageManager.bucket = FileManager.bucket  = ueditorProperties.getBucket();
-		StorageManager.baseUrl = FileManager.baseUrl  = ueditorProperties.getBaseUrl();
+		StorageManager.accessId = FileManager.accessId = ueditorProperties.getAccessId();
+		StorageManager.accessKey = FileManager.accessKey = ueditorProperties.getAccessKey();		
+		StorageManager.bucketName = FileManager.bucketName  = ueditorProperties.getBucketName();
+		StorageManager.downloadDNS = FileManager.downloadDNS  = ueditorProperties.getDownloadDNS();
 		StorageManager.uploadDirPrefix = FileManager.uploadDirPrefix  = ueditorProperties.getUploadDirPrefix();
-		StorageManager.zone = FileManager.zone  = ueditorProperties.getZoneObj();
-
+		StorageManager.endpoint = FileManager.endpoint  = ueditorProperties.getEndpoint();
 		
 	}
 	
