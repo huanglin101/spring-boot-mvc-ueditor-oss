@@ -6,3 +6,5 @@ target
 .classpath
 .factorypath
 .settings
+*.properties
+
