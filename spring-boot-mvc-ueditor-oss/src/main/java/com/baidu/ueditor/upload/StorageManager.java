@@ -29,14 +29,15 @@ import com.baidu.ueditor.define.State;
 public class StorageManager {
 public static final int BUFFER_SIZE = 8192;
 	
-	public static String accessId;
-	public static String accessKey;
-	public static String downloadDNS;
-	public static String bucketName;
-	public static String uploadDirPrefix;
-	public static String endpoint;
+	public static   String accessId="";
+	public static   String accessKey="";
+	public static   String downloadDNS="";
+	public static   String bucketName="";
+	public static   String uploadDirPrefix="";
+	public static   String endpoint="";
 	private static final Logger logger = Logger.getLogger(StorageManager.class);
-	
+	private StorageManager() {
+	}
 	public static State saveBinaryFile(byte[] data, String path) {
 	
 		

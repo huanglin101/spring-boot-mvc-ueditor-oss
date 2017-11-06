@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.zrk1000</groupId>
-	<artifactId>spring-boot-mvc-ueditor-qiniu</artifactId>
-	<version>ueditor1.4.3.3-qiniu7.2.X</version>
+	<groupId>com.scantron</groupId>
+	<artifactId>spring-boot-mvc-ueditor-oss</artifactId>
+	<version>ueditor1.4.3</version>
 	<packaging>jar</packaging>
 
-	<name>spring-boot-mvc-ueditor-qiniu</name>
+	<name>spring-boot-mvc-ueditor-oss</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -53,6 +53,11 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>${spring-boot}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-actuator</artifactId>	
+			<version>${spring-boot}</version>		
 		</dependency>
 		
 		<dependency>

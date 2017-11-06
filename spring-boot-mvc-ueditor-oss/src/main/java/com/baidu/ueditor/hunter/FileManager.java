@@ -34,7 +34,7 @@ public class FileManager {
 			client = new OSSClient(endpoint, accessId, accessKey);
 			ObjectListing objectListing =client.listObjects(bucketName, uploadDirPrefix);
 			List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
-			List<String> fileList = new ArrayList<String>();
+			List<String> fileList = new ArrayList<>();
 			for (OSSObjectSummary fileInfo : sums) {
 				fileList.add(fileInfo.getKey());
 			}

@@ -4,12 +4,16 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.baidu.ueditor.config.UeditorProperties;
 import com.baidu.ueditor.define.ActionMap;
 import com.baidu.ueditor.define.AppInfo;
 import com.baidu.ueditor.define.BaseState;
 import com.baidu.ueditor.define.State;
 import com.baidu.ueditor.hunter.FileManager;
 import com.baidu.ueditor.hunter.ImageHunter;
+import com.baidu.ueditor.upload.StorageManager;
 import com.baidu.ueditor.upload.Uploader;
 
 public class ActionEnter {
@@ -20,8 +24,16 @@ public class ActionEnter {
 	
 	private String actionType = null;
 	
-	public ActionEnter(ConfigManager configManager){
-		this.configManager = configManager;
+	public ActionEnter(String configstring){
+		UeditorProperties ueditorProperties=JSONObject.parseObject(configstring,UeditorProperties.class);
+		this.configManager = new ConfigManager(ueditorProperties.getConfig());
+		StorageManager.accessId = FileManager.accessId = ueditorProperties.getAccessId();
+		StorageManager.accessKey = FileManager.accessKey = ueditorProperties.getAccessKey();		
+		StorageManager.bucketName = FileManager.bucketName  = ueditorProperties.getBucketName();
+		StorageManager.downloadDNS = FileManager.downloadDNS  = ueditorProperties.getDownloadDNS();
+		StorageManager.uploadDirPrefix = FileManager.uploadDirPrefix  = ueditorProperties.getUploadDirPrefix();
+		StorageManager.endpoint = FileManager.endpoint  = ueditorProperties.getEndpoint();
+		
 	}
 	
 	public String exec (HttpServletRequest request) {
